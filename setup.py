@@ -11,7 +11,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='esr21-prn',
+    name='esr21-metadata-rules',
     version='0.1.1',
     author=u'Software Engineering & Data Management',
     author_email='se-dmc@bhp.org.bw',
