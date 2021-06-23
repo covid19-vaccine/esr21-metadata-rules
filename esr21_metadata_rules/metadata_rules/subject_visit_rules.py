@@ -13,7 +13,7 @@ class SubjectVisitRuleGroup(CrfRuleGroup):
         predicate=pc.func_participant_female,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.pregnancy',
+        target_models=[f'{app_label}.pregnancytest',
                        f'{app_label}.pregnancystatus', ])
 
     class Meta:
