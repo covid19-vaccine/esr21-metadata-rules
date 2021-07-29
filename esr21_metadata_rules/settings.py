@@ -13,6 +13,7 @@ import sys
 import os
 from pathlib import Path
 
+SITE_ID = 40
 APP_NAME = 'esr21_metadata_rules'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,6 +30,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+ETC_DIR = '/etc/'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,23 +42,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'edc_reference.apps.AppConfig',
-    'esr21_reference.apps.AppConfig',
-    'edc_metadata_rules.apps.AppConfig',
-    'esr21_metadata_rules.apps.EdcVisitTrackingAppConfig',
-    'esr21_metadata_rules.apps.EdcMetadataAppConfig',
-    'esr21_metadata_rules.apps.EdcFacilityAppConfig',
-    'esr21_metadata_rules.apps.AppConfig',
+    'edc_identifier.apps.AppConfig',
+    'edc_visit_schedule.apps.AppConfig',
+    'esr21_visit_schedule.apps.AppConfig'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'edc_subject_dashboard.middleware.DashboardMiddleware',
 ]
 
 ROOT_URLCONF = 'esr21_metadata_rules.urls'
@@ -105,6 +106,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+DASHBOARD_URL_NAMES = {}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
