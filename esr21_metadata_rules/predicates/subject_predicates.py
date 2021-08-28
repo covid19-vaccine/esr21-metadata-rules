@@ -20,3 +20,7 @@ class SubjectPredicates(PredicateCollection):
             return False
         else:
             return informed_consent_obj.gender == FEMALE
+
+    def func_women_child_bearing_age(self, visit=None, **kwargs):
+
+        pass
