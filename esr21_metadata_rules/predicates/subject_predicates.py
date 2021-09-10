@@ -1,5 +1,5 @@
 from django.apps import apps as django_apps
-from edc_constants.constants import FEMALE
+from edc_constants.constants import FEMALE, YES
 from edc_metadata_rules import PredicateCollection
 
 
@@ -21,6 +21,22 @@ class SubjectPredicates(PredicateCollection):
         else:
             return informed_consent_obj.gender == FEMALE
 
-    def func_women_child_bearing_age(self, visit=None, **kwargs):
+    def func_serious_ae_required(self, visit=None, **kwargs):
 
-        pass
+        ae_model = django_apps.get_model(f'{self.app_label}.adverseevent')
+        try:
+            ae_obj = ae_model.objects.get(subject_visit=visit)
+        except ae_model.DoesNotExist:
+            return False
+        else:
+            return ae_obj.adverseeventrecord_set.filter(serious_event=YES).count() != 0
+
+    def func_special_interest_ae_required(self, visit=None, **kwargs):
+
+        ae_model = django_apps.get_model(f'{self.app_label}.adverseevent')
+        try:
+            ae_obj = ae_model.objects.get(subject_visit=visit)
+        except ae_model.DoesNotExist:
+            return False
+        else:
+            return ae_obj.adverseeventrecord_set.filter(special_interest_ae=YES).count() != 0
