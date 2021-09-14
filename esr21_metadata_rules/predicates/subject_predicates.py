@@ -1,6 +1,7 @@
 from django.apps import apps as django_apps
-from edc_constants.constants import FEMALE, YES
+from edc_constants.constants import FEMALE, YES, NEG, POS
 from edc_metadata_rules import PredicateCollection
+from esr21_subject.helper_classes import StatusHelper
 
 
 class SubjectPredicates(PredicateCollection):
