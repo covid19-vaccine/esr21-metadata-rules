@@ -1,8 +1,7 @@
-from dateutil.relativedelta import relativedelta
 from django.test import TestCase, tag
 from edc_base.tests import SiteTestCaseMixin
 from edc_base.utils import get_utcnow
-from edc_constants.constants import YES, POS, NEG, FEMALE
+from edc_constants.constants import FEMALE
 from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper

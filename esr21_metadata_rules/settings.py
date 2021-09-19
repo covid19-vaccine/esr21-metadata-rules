@@ -42,9 +42,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'edc_reference.apps.AppConfig',
     'edc_identifier.apps.AppConfig',
+    'esr21_reference.apps.AppConfig',
     'edc_visit_schedule.apps.AppConfig',
-    'esr21_visit_schedule.apps.AppConfig'
+    'esr21_visit_schedule.apps.AppConfig',
+    'esr21_metadata_rules.apps.AppConfig',
 ]
 
 MIDDLEWARE = [
