@@ -1,2 +1,3 @@
 from .covid19_symptomatic_infection_req_rules import Covid19SymptomaticInfectionsRuleGroup
+from .pregnancy_test_rules import PregnancyTestRuleGroup
 from .subject_visit_req_rules import SubjectVisitReqRuleGroup
