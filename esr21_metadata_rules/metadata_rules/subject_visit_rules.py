@@ -1,5 +1,7 @@
-from edc_metadata import NOT_REQUIRED, REQUIRED
 from edc_metadata_rules import CrfRule, CrfRuleGroup, register
+
+from edc_metadata import NOT_REQUIRED, REQUIRED
+
 from ..predicates import SubjectPredicates
 
 app_label = 'esr21_subject'
@@ -14,6 +16,13 @@ class SubjectVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.pregnancystatus', ])
+
+    covid_symptoms = CrfRule(
+        predicate=pc.func_symptomatic_infection_enrol,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.physicalexam',
+                       f'{app_label}.vaccinationdetails'])
 
     class Meta:
         app_label = app_label
