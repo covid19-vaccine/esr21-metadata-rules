@@ -52,5 +52,7 @@ class SubjectPredicates(PredicateCollection):
         except screening_model.DoesNotExist:
             return False
         else:
-            return (visit.visit_code == '1000' and
-                    screening_obj.symptomatic_infections_experiences != YES)
+            if visit.visit_code == '1000':
+                return screening_obj.symptomatic_infections_experiences != YES
+            else:
+                return True
