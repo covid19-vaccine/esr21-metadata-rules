@@ -1,7 +1,6 @@
-from edc_metadata_rules import PredicateCollection
-
 from django.apps import apps as django_apps
-from edc_constants.constants import FEMALE, YES
+from edc_constants.constants import FEMALE, YES, NEG
+from edc_metadata_rules import PredicateCollection
 
 
 class SubjectPredicates(PredicateCollection):
@@ -45,6 +44,7 @@ class SubjectPredicates(PredicateCollection):
     def func_symptomatic_infection_enrol(self, visit=None, **kwargs):
 
         screening_model = django_apps.get_model(f'{self.app_label}.screeningeligibility')
+        covid19_results_obj = self.covid19_results_obj(visit)
 
         try:
             screening_obj = screening_model.objects.get(
@@ -52,7 +52,21 @@ class SubjectPredicates(PredicateCollection):
         except screening_model.DoesNotExist:
             return False
         else:
-            if visit.visit_code == '1000':
+            cond = True if not covid19_results_obj or\
+             covid19_results_obj.covid_result != NEG else False
+            if visit.visit_code == '1000' and cond:
                 return screening_obj.symptomatic_infections_experiences != YES
             else:
                 return True
+
+    def covid19_results_obj(self, visit):
+        covid19_results_model = django_apps.get_model(f'{self.app_label}.covid19results')
+        try:
+            covid19results_obj = covid19_results_model.objects.get(
+                subject_visit__subject_identifier=visit.subject_identifier,
+                subject_visit__visit_code=visit.visit_code
+                )
+        except covid19_results_model.DoesNotExist:
+            return None
+        else:
+            return covid19results_obj
