@@ -15,7 +15,7 @@ class SubjectPredicates(PredicateCollection):
 
         try:
             informed_consent_obj = informed_consent_cls.objects.filter(
-                subject_identifier=visit.appointment.subject_identifier).latest('')
+                subject_identifier=visit.appointment.subject_identifier).latest('created')
         except informed_consent_cls.DoesNotExist:
             return False
         else:
