@@ -54,6 +54,8 @@ class SubjectPredicates(PredicateCollection):
         else:
             cond = True if not covid19_results_obj or\
              covid19_results_obj.covid_result != NEG else False
+            if visit.visit_code_sequence > 0:
+                return False
             if visit.visit_code == '1000' and cond:
                 return screening_obj.symptomatic_infections_experiences != YES
             else:
