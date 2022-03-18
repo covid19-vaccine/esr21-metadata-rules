@@ -15,7 +15,7 @@ class SubjectPredicates(PredicateCollection):
 
         try:
             informed_consent_obj = informed_consent_cls.objects.filter(
-                subject_identifier=visit.appointment.subject_identifier).latest('')
+                subject_identifier=visit.appointment.subject_identifier).latest('created')
         except informed_consent_cls.DoesNotExist:
             return False
         else:
@@ -53,13 +53,13 @@ class SubjectPredicates(PredicateCollection):
             return False
         else:
             cond = True if not covid19_results_obj or\
-             covid19_results_obj.covid_result != NEG else False
+             covid19_results_obj.covid_result == NEG else False
             if visit.visit_code_sequence > 0:
                 return False
-            if visit.visit_code == '1000' and cond:
-                return screening_obj.symptomatic_infections_experiences != YES
-            else:
+            if (visit.visit_code == '1000' or visit.visit_code == '1070') and cond:
                 return True
+            else:
+                return False
 
     def covid19_results_obj(self, visit):
         covid19_results_model = django_apps.get_model(f'{self.app_label}.covid19results')
