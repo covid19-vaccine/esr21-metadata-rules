@@ -14,8 +14,8 @@ class SubjectPredicates(PredicateCollection):
         informed_consent_cls = django_apps.get_model('esr21_subject.informedconsent')
 
         try:
-            informed_consent_obj = informed_consent_cls.objects.get(
-                subject_identifier=visit.appointment.subject_identifier)
+            informed_consent_obj = informed_consent_cls.objects.filter(
+                subject_identifier=visit.appointment.subject_identifier).latest('created')
         except informed_consent_cls.DoesNotExist:
             return False
         else:
