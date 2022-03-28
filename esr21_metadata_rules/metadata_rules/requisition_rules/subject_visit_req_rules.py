@@ -12,7 +12,7 @@ pc = SubjectPredicates()
 class SubjectVisitReqRuleGroup(RequisitionRuleGroup):
 
     sars_pcr_enroll = RequisitionRule(
-        predicate=pc.func_symptomatic_infection_enrol,
+        predicate=pc.func_symptomatic_infection_pcr_enrol,
         consequence=NOT_REQUIRED,
         alternative=REQUIRED,
         target_panels=[sars_pcr_panel])
