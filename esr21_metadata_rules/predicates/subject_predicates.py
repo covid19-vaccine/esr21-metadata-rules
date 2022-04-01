@@ -19,6 +19,8 @@ class SubjectPredicates(PredicateCollection):
         except informed_consent_cls.DoesNotExist:
             return False
         else:
+            if visit.visit_code_sequence > 0:
+                return False
             return informed_consent_obj.gender == FEMALE
 
     def func_serious_ae_required(self, visit=None, **kwargs):
@@ -41,25 +43,49 @@ class SubjectPredicates(PredicateCollection):
         else:
             return ae_obj.adverseeventrecord_set.filter(special_interest_ae=YES).count() != 0
 
-    def func_symptomatic_infection_enrol(self, visit=None, **kwargs):
+    def func_symptomatic_infection_enrol(self, visit, **kwargs):
+        check = self.check_covid_symptomatic(visit)
+        return check if check is not None else False
 
+    def func_symptomatic_infection_pcr_enrol(self, visit, **kwargs):
+        check = self.check_covid_symptomatic(visit)
+        return check if check is not None else True
+
+    def check_covid_symptomatic(self, visit=None):
+        # If symptomatic, and no/pos covid results; don't show physical and vaccination form. show SARS-CoV
+        # If symptomatic, and neg covid results; show physical and vaccination
+        # If not symptomatic show physical and vaccination form. no SARS-CoV
         screening_model = django_apps.get_model(f'{self.app_label}.screeningeligibility')
-        covid19_results_obj = self.covid19_results_obj(visit)
 
         try:
             screening_obj = screening_model.objects.get(
                 subject_identifier=visit.subject_identifier)
         except screening_model.DoesNotExist:
+            return None
+        else:
+            symptomatic = True if screening_obj.symptomatic_infections_experiences == YES else False
+            covid19_results = self.covid19_results_obj(visit)
+            enrol_visit = True if visit.visit_code == '1000' and visit.visit_code_sequence == 0 else False
+            if enrol_visit and symptomatic:
+                if covid19_results and getattr(covid19_results, 'covid_result', None) == NEG:
+                    return True
+                return False
+            elif enrol_visit and not symptomatic:
+                return True
+            elif visit.visit_code == '1070' and visit.visit_code_sequence == 0:
+                return True
+            return None
+
+    def func_preg_test_required(self, visit=None, **kwargs):
+        preg_status = django_apps.get_model(f'{self.app_label}.pregnancystatus')
+        try:
+            preg_status_obj = preg_status.objects.get(subject_visit=visit)
+        except preg_status.DoesNotExist:
             return False
         else:
-            cond = True if not covid19_results_obj or\
-             covid19_results_obj.covid_result != NEG else False
-            if visit.visit_code_sequence > 0:
-                return False
-            if visit.visit_code == '1000' and cond:
-                return screening_obj.symptomatic_infections_experiences != YES
-            else:
-                return True
+            if visit.visit_code in ['1000', '1070'] and visit.visit_code_sequence == 0:
+                return preg_status_obj.child_bearing_potential == YES
+            return False
 
     def covid19_results_obj(self, visit):
         covid19_results_model = django_apps.get_model(f'{self.app_label}.covid19results')
