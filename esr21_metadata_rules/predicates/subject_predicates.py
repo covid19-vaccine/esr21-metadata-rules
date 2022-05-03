@@ -72,7 +72,7 @@ class SubjectPredicates(PredicateCollection):
                 return False
             elif enrol_visit and not symptomatic:
                 return True
-            elif visit.visit_code == '1070' and visit.visit_code_sequence == 0:
+            elif visit.visit_code in ['1070', '1170'] and visit.visit_code_sequence == 0:
                 return True
             return None
 
@@ -83,7 +83,7 @@ class SubjectPredicates(PredicateCollection):
         except preg_status.DoesNotExist:
             return False
         else:
-            if visit.visit_code in ['1000', '1070'] and visit.visit_code_sequence == 0:
+            if visit.visit_code in ['1000', '1070', '1170'] and visit.visit_code_sequence == 0:
                 return preg_status_obj.child_bearing_potential == YES
             return False
 
@@ -92,7 +92,8 @@ class SubjectPredicates(PredicateCollection):
         try:
             covid19results_obj = covid19_results_model.objects.get(
                 subject_visit__subject_identifier=visit.subject_identifier,
-                subject_visit__visit_code=visit.visit_code
+                subject_visit__visit_code=visit.visit_code,
+                subject_visit__visit_code_sequence=visit.visit_code_sequence
                 )
         except covid19_results_model.DoesNotExist:
             return None
