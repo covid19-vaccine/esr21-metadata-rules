@@ -93,7 +93,7 @@ class SubjectPredicates(PredicateCollection):
             covid19results_obj = covid19_results_model.objects.get(
                 subject_visit__subject_identifier=visit.subject_identifier,
                 subject_visit__visit_code=visit.visit_code,
-                subject_visit__visit_code_sequence=visit.visit_code
+                subject_visit__visit_code_sequence=visit.visit_code_sequence
                 )
         except covid19_results_model.DoesNotExist:
             return None
