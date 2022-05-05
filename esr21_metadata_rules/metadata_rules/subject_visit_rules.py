@@ -9,7 +9,6 @@ pc = SubjectPredicates()
 
 @register()
 class SubjectVisitRuleGroup(CrfRuleGroup):
-
     pregnancy = CrfRule(
         predicate=pc.func_participant_female,
         consequence=REQUIRED,
@@ -22,6 +21,13 @@ class SubjectVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.physicalexam',
                        f'{app_label}.vaccinationdetails'])
+
+    preg_outcome = CrfRule(
+        predicate=pc.fun_preg_outcome_required,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.pregoutcome'])
+
 
     class Meta:
         app_label = app_label
