@@ -1,7 +1,6 @@
 from django.apps import apps as django_apps
-from edc_constants.constants import FEMALE, YES, NEG
+from edc_constants.constants import FEMALE, YES, NEG, POS
 from edc_metadata_rules import PredicateCollection
-from edc_reference.models import Reference
 
 
 class SubjectPredicates(PredicateCollection):
@@ -15,6 +14,10 @@ class SubjectPredicates(PredicateCollection):
     @property
     def preg_test_cls(self):
         return django_apps.get_model(f'{self.app_label}.pregnancytest')
+
+    @property
+    def preg_outcome_cls(self):
+        return django_apps.get_model(f'{self.app_label}.pregoutcome')
 
     def func_participant_female(self, visit=None, **kwargs):
         """Returns true the participant is female."""
@@ -110,9 +113,26 @@ class SubjectPredicates(PredicateCollection):
         else:
             return covid19results_obj
 
-    def fun_preg_outcome_required(self, visit=None, **kwargs):
-        Reference.objects.filter(
-            model=self.preg_test_cls,
-            identifier=visit.appointment.subject_identifier,
-            report_datetime__lt=visit.report_datetime).order_by(
-            '-report_datetime').first()
+    def func_preg_outcome_required(self, visit=None, **kwargs):
+        try:
+            current_preg = self.preg_test_cls.objects.get(
+                subject_visit=visit,
+                preg_performed=YES,
+                result=NEG)
+        except self.preg_test_cls.DoesNotExist:
+            return False
+        else:
+            pregnancies = self.preg_test_cls.objects.filter(
+                subject_visit__subject_identifier=visit.subject_identifier,
+                preg_performed=YES, result=POS)
+            if pregnancies:
+                latest_test = pregnancies.latest('created')
+
+                preg_outcome = self.preg_outcome_cls.objects.filter(
+                    subject_visit__subject_identifier=visit.subject_identifier,
+                    report_datetime__date__range=(latest_test.report_datetime.date(),
+                                                  current_preg.report_datetime.date()))
+
+                if not preg_outcome:
+                    return True
+            return False
