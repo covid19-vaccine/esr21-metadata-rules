@@ -9,7 +9,6 @@ pc = SubjectPredicates()
 
 @register()
 class SubjectVisitRuleGroup(CrfRuleGroup):
-
     pregnancy = CrfRule(
         predicate=pc.func_participant_female,
         consequence=REQUIRED,

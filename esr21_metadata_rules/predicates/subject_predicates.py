@@ -1,12 +1,23 @@
 from django.apps import apps as django_apps
-from edc_constants.constants import FEMALE, YES, NEG
+from edc_constants.constants import FEMALE, YES, NEG, POS
 from edc_metadata_rules import PredicateCollection
 
 
 class SubjectPredicates(PredicateCollection):
-
     app_label = 'esr21_subject'
     visit_model = f'{app_label}.subjectvisit'
+
+    @property
+    def preg_status(self):
+        return django_apps.get_model(f'{self.app_label}.pregnancystatus')
+
+    @property
+    def preg_test_cls(self):
+        return django_apps.get_model(f'{self.app_label}.pregnancytest')
+
+    @property
+    def preg_outcome_cls(self):
+        return django_apps.get_model(f'{self.app_label}.pregoutcome')
 
     def func_participant_female(self, visit=None, **kwargs):
         """Returns true the participant is female."""
@@ -41,7 +52,8 @@ class SubjectPredicates(PredicateCollection):
         except ae_model.DoesNotExist:
             return False
         else:
-            return ae_obj.adverseeventrecord_set.filter(special_interest_ae=YES).count() != 0
+            return ae_obj.adverseeventrecord_set.filter(
+                special_interest_ae=YES).count() != 0
 
     def func_symptomatic_infection_enrol(self, visit, **kwargs):
         check = self.check_covid_symptomatic(visit)
@@ -67,7 +79,8 @@ class SubjectPredicates(PredicateCollection):
             covid19_results = self.covid19_results_obj(visit)
             enrol_visit = True if visit.visit_code == '1000' and visit.visit_code_sequence == 0 else False
             if enrol_visit and symptomatic:
-                if covid19_results and getattr(covid19_results, 'covid_result', None) == NEG:
+                if covid19_results and getattr(covid19_results, 'covid_result',
+                                               None) == NEG:
                     return True
                 return False
             elif enrol_visit and not symptomatic:
@@ -77,13 +90,13 @@ class SubjectPredicates(PredicateCollection):
             return None
 
     def func_preg_test_required(self, visit=None, **kwargs):
-        preg_status = django_apps.get_model(f'{self.app_label}.pregnancystatus')
         try:
-            preg_status_obj = preg_status.objects.get(subject_visit=visit)
-        except preg_status.DoesNotExist:
+            preg_status_obj = self.preg_status.objects.get(subject_visit=visit)
+        except self.preg_status.DoesNotExist:
             return False
         else:
-            if visit.visit_code in ['1000', '1070', '1170'] and visit.visit_code_sequence == 0:
+            if visit.visit_code in ['1000', '1070',
+                                    '1170'] and visit.visit_code_sequence == 0:
                 return preg_status_obj.child_bearing_potential == YES
             return False
 
@@ -94,8 +107,32 @@ class SubjectPredicates(PredicateCollection):
                 subject_visit__subject_identifier=visit.subject_identifier,
                 subject_visit__visit_code=visit.visit_code,
                 subject_visit__visit_code_sequence=visit.visit_code_sequence
-                )
+            )
         except covid19_results_model.DoesNotExist:
             return None
         else:
             return covid19results_obj
+
+    def func_preg_outcome_required(self, visit=None, **kwargs):
+        try:
+            current_preg = self.preg_test_cls.objects.get(
+                subject_visit=visit,
+                preg_performed=YES,
+                result=NEG)
+        except self.preg_test_cls.DoesNotExist:
+            return False
+        else:
+            pregnancies = self.preg_test_cls.objects.filter(
+                subject_visit__subject_identifier=visit.subject_identifier,
+                preg_performed=YES, result=POS)
+            if pregnancies:
+                latest_test = pregnancies.latest('created')
+
+                preg_outcome = self.preg_outcome_cls.objects.filter(
+                    subject_visit__subject_identifier=visit.subject_identifier,
+                    report_datetime__date__range=(latest_test.report_datetime.date(),
+                                                  current_preg.report_datetime.date()))
+
+                if not preg_outcome:
+                    return True
+            return False
