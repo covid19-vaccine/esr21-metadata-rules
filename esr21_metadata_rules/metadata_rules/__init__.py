@@ -6,3 +6,4 @@ from .pregnancy_test_rules import PregnancyTestCrfRuleGroup
 from .requisition_rules import SubjectVisitReqRuleGroup, PregnancyTestRuleGroup
 from .subject_visit_rules import SubjectVisitRuleGroup
 from .vaccination_details_rules import VaccinationDetailsRuleGroup
+from .medical_history_rules import MedicalHistoryRuleGroup

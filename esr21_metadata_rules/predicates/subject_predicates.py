@@ -136,3 +136,29 @@ class SubjectPredicates(PredicateCollection):
                 if not preg_outcome:
                     return True
             return False
+
+    def fun_required_at_booster(self, visit=None, **kwargs):
+        vac_history_cls = django_apps.get_model('esr21_subject.vaccinationhistory')
+        try:
+            vac_history_obj = vac_history_cls.objects.get(
+                subject_identifier=visit.subject_identifier, )
+        except vac_history_cls.DoesNotExist:
+            return False
+        else:
+            return not (vac_history_obj.dose1_product_name == 'azd_1222' or
+                        vac_history_obj.dose2_product_name == 'azd_1222')
+
+    def fun_conc_med_required(self, visit=None, **kwargs):
+        med_history_cls = django_apps.get_model(f'{self.app_label}.medicalhistory')
+        med_diagnosis_cls = django_apps.get_model(f'{self.app_label}.medicaldiagnosis')
+
+        try:
+            med_history_obj = med_history_cls.objects.get(subject_visit=visit)
+        except med_history_cls.DoesNotExist:
+            return False
+        else:
+            conc_med_count = med_diagnosis_cls.objects.filter(
+                medical_history=med_history_obj,
+                condition_related_meds=YES
+            ).count()
+            return conc_med_count > 0
