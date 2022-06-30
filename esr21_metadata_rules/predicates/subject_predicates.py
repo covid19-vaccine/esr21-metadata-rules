@@ -1,7 +1,6 @@
 from django.apps import apps as django_apps
 from edc_constants.constants import FEMALE, YES, NEG, POS
 from edc_metadata_rules import PredicateCollection
-from _ast import Or
 
 
 class SubjectPredicates(PredicateCollection):
@@ -15,6 +14,10 @@ class SubjectPredicates(PredicateCollection):
     @property
     def preg_test_cls(self):
         return django_apps.get_model(f'{self.app_label}.pregnancytest')
+
+    @property
+    def edc_appointment_cls(self):
+        return django_apps.get_model('edc_appointment.appointment')
 
     @property
     def preg_outcome_cls(self):
@@ -140,11 +143,21 @@ class SubjectPredicates(PredicateCollection):
 
     def fun_enrol_forms_required(self, visit=None, **kwargs):
         inperson_visits = ['1000', '1070', '1170']
-        vac_history_cls = django_apps.get_model('esr21_subject.vaccinationhistory')
+        vac_history_cls = django_apps.get_model(
+            'esr21_subject.vaccinationhistory')
         try:
             vac_history_obj = vac_history_cls.objects.get(
                 subject_identifier=visit.subject_identifier, )
         except vac_history_cls.DoesNotExist:
+            try:
+                previous_appointment = self.edc_appointment_cls.objects.get(
+                    subject_identifier=visit.subject_identifier,
+                    visit_code=visit.visit_code)
+            except previous_appointment.DoesNotExist:
+                pass
+            else:
+                if previous_appointment.previous:
+                    return False
             return visit in inperson_visits
         else:
             vaccinated_onstudy = (vac_history_obj.dose1_product_name == 'azd_1222' or
