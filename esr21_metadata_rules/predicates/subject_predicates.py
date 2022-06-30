@@ -150,13 +150,14 @@ class SubjectPredicates(PredicateCollection):
                 subject_identifier=visit.subject_identifier, )
         except vac_history_cls.DoesNotExist:
             try:
-                previous_appointment = self.edc_appointment_cls.objects.get(
+                current_appointment = self.edc_appointment_cls.objects.get(
                     subject_identifier=visit.subject_identifier,
-                    visit_code=visit.visit_code)
-            except previous_appointment.DoesNotExist:
+                    visit_code=visit.visit_code,
+                    visit_code_sequence=visit.visit_code_sequence)
+            except current_appointment.DoesNotExist:
                 pass
             else:
-                if previous_appointment.previous:
+                if current_appointment.previous:
                     return False
             return visit in inperson_visits
         else:
