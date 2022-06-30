@@ -149,6 +149,7 @@ class SubjectPredicates(PredicateCollection):
             vac_history_obj = vac_history_cls.objects.get(
                 subject_identifier=visit.subject_identifier, )
         except vac_history_cls.DoesNotExist:
+<<<<<<< HEAD
             try:
                 previous_appointment = self.edc_appointment_cls.objects.get(
                     subject_identifier=visit.subject_identifier,
@@ -159,10 +160,13 @@ class SubjectPredicates(PredicateCollection):
                 if previous_appointment.previous:
                     return False
             return visit in inperson_visits
+=======
+            return visit.visit_code in inperson_visits
+>>>>>>> 4a839abf314cdff1385feb7a689f68666e8c2128
         else:
             vaccinated_onstudy = (vac_history_obj.dose1_product_name == 'azd_1222' or
                                   vac_history_obj.dose2_product_name == 'azd_1222')
-            return visit in inperson_visits and not vaccinated_onstudy
+            return visit.visit_code in inperson_visits and not vaccinated_onstudy
 
     def fun_conc_med_required(self, visit=None, **kwargs):
         med_history_cls = django_apps.get_model(f'{self.app_label}.medicalhistory')
