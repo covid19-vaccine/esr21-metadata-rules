@@ -1,6 +1,7 @@
+from edc_metadata_rules import PredicateCollection
+
 from django.apps import apps as django_apps
 from edc_constants.constants import FEMALE, YES, NEG, POS
-from edc_metadata_rules import PredicateCollection
 
 
 class SubjectPredicates(PredicateCollection):
@@ -147,7 +148,8 @@ class SubjectPredicates(PredicateCollection):
             'esr21_subject.vaccinationhistory')
         try:
             vac_history_obj = vac_history_cls.objects.get(
-                subject_identifier=visit.subject_identifier, )
+                subject_identifier=visit.subject_identifier,
+                report_datetime__lte=visit.report_datetime)
         except vac_history_cls.DoesNotExist:
             try:
                 current_appointment = self.edc_appointment_cls.objects.get(
@@ -159,7 +161,7 @@ class SubjectPredicates(PredicateCollection):
             else:
                 if current_appointment.previous:
                     return False
-            return visit in inperson_visits
+            return visit.visit_code in inperson_visits
         else:
             vaccinated_onstudy = (vac_history_obj.dose1_product_name == 'azd_1222' or
                                   vac_history_obj.dose2_product_name == 'azd_1222')
