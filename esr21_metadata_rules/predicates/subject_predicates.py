@@ -131,13 +131,12 @@ class SubjectPredicates(PredicateCollection):
                 subject_visit__subject_identifier=visit.subject_identifier,
                 preg_performed=YES, result=POS)
             if pregnancies:
-                latest_test = pregnancies.latest('created')
+                latest_test = pregnancies.latest('preg_date')
 
                 preg_outcome = self.preg_outcome_cls.objects.filter(
                     subject_visit__subject_identifier=visit.subject_identifier,
-                    report_datetime__date__range=(latest_test.report_datetime.date(),
-                                                  current_preg.report_datetime.date()))
-
+                    report_datetime__date__range=(latest_test.preg_date.date(),
+                                                  current_preg.preg_date.date()))
                 if not preg_outcome:
                     return True
             return False
@@ -156,7 +155,7 @@ class SubjectPredicates(PredicateCollection):
                     subject_identifier=visit.subject_identifier,
                     visit_code=visit.visit_code,
                     visit_code_sequence=visit.visit_code_sequence)
-            except current_appointment.DoesNotExist:
+            except self.edc_appointment_cls.DoesNotExist:
                 pass
             else:
                 if current_appointment.previous:
