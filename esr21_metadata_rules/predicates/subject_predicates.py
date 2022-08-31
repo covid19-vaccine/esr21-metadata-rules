@@ -131,14 +131,20 @@ class SubjectPredicates(PredicateCollection):
                 subject_visit__subject_identifier=visit.subject_identifier,
                 preg_performed=YES, result=POS)
             if pregnancies:
-                latest_test = pregnancies.latest('preg_date')
+                latest_pregnancy = pregnancies.latest('preg_date')
 
                 preg_outcome = self.preg_outcome_cls.objects.filter(
                     subject_visit__subject_identifier=visit.subject_identifier,
-                    report_datetime__date__range=(latest_test.preg_date.date(),
-                                                  current_preg.preg_date.date()))
-                if not preg_outcome:
-                    return True
+                    report_datetime__date__range=(current_preg.preg_date.date(),
+                                                  latest_pregnancy.preg_date.date()))
+
+                in_between_neg = self.preg_test_cls.objects.filter(
+                    subject_visit__subject_identifier=visit.subject_identifier,
+                    result=NEG, preg_date__date__range=(current_preg.preg_date.date(),
+                                                        latest_pregnancy.preg_date.date()))
+                return (not preg_outcome and current_preg.preg_date.date() >
+                        latest_pregnancy.preg_date.date() and not in_between_neg)
+
             return False
 
     def fun_enrol_forms_required(self, visit=None, **kwargs):
