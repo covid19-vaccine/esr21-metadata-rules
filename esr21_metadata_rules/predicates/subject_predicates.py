@@ -156,16 +156,9 @@ class SubjectPredicates(PredicateCollection):
                 subject_identifier=visit.subject_identifier,
                 report_datetime__lte=visit.report_datetime)
         except vac_history_cls.DoesNotExist:
-            try:
-                current_appointment = self.edc_appointment_cls.objects.get(
-                    subject_identifier=visit.subject_identifier,
-                    visit_code=visit.visit_code,
-                    visit_code_sequence=visit.visit_code_sequence)
-            except self.edc_appointment_cls.DoesNotExist:
-                pass
-            else:
-                if current_appointment.previous:
-                    return False
+            current_appointment = visit.appointment
+            if current_appointment.previous:
+                return False
             return visit.visit_code in inperson_visits
         else:
             vaccinated_onstudy = (vac_history_obj.dose1_product_name == 'azd_1222' or
