@@ -129,7 +129,8 @@ class SubjectPredicates(PredicateCollection):
         preg_outcome = self.preg_outcome_cls.objects.filter(
             subject_visit__subject_identifier=visit.subject_identifier, )
         vaccination_details = self.vaccination_details_cls.objects.filter(
-            subject_visit__subject_identifier=visit.subject_identifier
+            subject_visit__subject_identifier=visit.subject_identifier,
+            received_dose=YES
         )
         if pregnancies and vaccination_details:
             latest_preg = pregnancies.latest('preg_date')
