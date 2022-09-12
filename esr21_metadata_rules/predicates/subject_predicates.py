@@ -24,6 +24,10 @@ class SubjectPredicates(PredicateCollection):
     def preg_outcome_cls(self):
         return django_apps.get_model(f'{self.app_label}.pregoutcome')
 
+    @property
+    def vaccination_details_cls(self):
+        return django_apps.get_model(f'{self.app_label}.vaccinationdetails')
+
     def func_participant_female(self, visit=None, **kwargs):
         """Returns true the participant is female."""
 
@@ -124,7 +128,10 @@ class SubjectPredicates(PredicateCollection):
             preg_performed=YES, result=POS)
         preg_outcome = self.preg_outcome_cls.objects.filter(
             subject_visit__subject_identifier=visit.subject_identifier, )
-        if pregnancies:
+        vaccination_details = self.vaccination_details_cls.objects.filter(
+            subject_visit__subject_identifier=visit.subject_identifier
+        )
+        if pregnancies and vaccination_details:
             latest_preg = pregnancies.latest('preg_date')
             return True if visit.report_datetime > latest_preg.preg_date and not preg_outcome else False
         else:

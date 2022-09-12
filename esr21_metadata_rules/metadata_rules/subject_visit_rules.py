@@ -22,6 +22,12 @@ class SubjectVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.physicalexam',
                        f'{app_label}.vaccinationdetails'])
 
+    preg_outcome = CrfRule(
+        predicate=pc.func_preg_outcome_required,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.pregoutcome'])
+
     new_participants = CrfRule(
         predicate=pc.fun_enrol_forms_required,
         consequence=REQUIRED,
