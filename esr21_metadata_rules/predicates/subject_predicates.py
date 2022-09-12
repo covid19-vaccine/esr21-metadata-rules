@@ -148,7 +148,7 @@ class SubjectPredicates(PredicateCollection):
                 report_datetime__lte=visit.report_datetime)
         except vac_history_cls.DoesNotExist:
             current_appointment = visit.appointment
-            if current_appointment.previous:
+            if current_appointment.previous_by_timepoint:
                 return False
             return visit.visit_code in inperson_visits
         else:
