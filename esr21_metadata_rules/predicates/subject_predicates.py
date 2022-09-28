@@ -65,8 +65,10 @@ class SubjectPredicates(PredicateCollection):
                 special_interest_ae=YES).count() != 0
 
     def func_symptomatic_infection_enrol(self, visit, **kwargs):
-        check = self.check_covid_symptomatic(visit)
-        return check if check is not None else False
+        check = False
+        if self.func_pos_pregnancy_vax_nrequired(visit):
+            check = self.check_covid_symptomatic(visit)
+        return check
 
     def func_symptomatic_infection_pcr_enrol(self, visit, **kwargs):
         check = self.check_covid_symptomatic(visit)
@@ -170,3 +172,10 @@ class SubjectPredicates(PredicateCollection):
                 condition_related_meds=YES
             ).count()
             return conc_med_count > 0
+
+    def func_pos_pregnancy_vax_nrequired(self, visit=None, **kwargs):
+        inperson_visits = ['1000', '1070', '1170']
+        pos_preg = self.preg_test_cls.objects.filter(
+            subject_visit=visit,
+            result=POS)
+        return not pos_preg and visit.visit_code in inperson_visits
