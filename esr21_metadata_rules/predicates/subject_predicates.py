@@ -144,8 +144,9 @@ class SubjectPredicates(PredicateCollection):
         """
         inperson_visits = ['1000', '1070', '1170']
         current_appointment = visit.appointment
-        return (visit.visit_code in inperson_visits and not current_appointment.previous
-                and visit.visit_code_sequence == 0)
+        return (visit.visit_code in inperson_visits and
+                not current_appointment.previous_by_timepoint and
+                visit.visit_code_sequence == 0)
 
     def fun_conc_med_required(self, visit=None, **kwargs):
         med_history_cls = django_apps.get_model(f'{self.app_label}.medicalhistory')
