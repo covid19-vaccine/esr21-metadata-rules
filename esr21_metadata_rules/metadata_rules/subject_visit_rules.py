@@ -29,13 +29,14 @@ class SubjectVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.pregoutcome'])
 
     new_participants = CrfRule(
-        predicate=pc.fun_enrol_forms_required,
+        predicate=pc.fun_is_enroll_visit,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.demographicsdata',
                        f'{app_label}.rapidhivtesting',
                        f'{app_label}.covid19preventativebehaviours',
                        f'{app_label}.medicalhistory', ])
+
 
     class Meta:
         app_label = app_label

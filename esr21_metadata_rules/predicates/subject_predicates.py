@@ -1,7 +1,6 @@
-from edc_metadata_rules import PredicateCollection
-
 from django.apps import apps as django_apps
 from edc_constants.constants import FEMALE, YES, NEG, POS
+from edc_metadata_rules import PredicateCollection
 
 
 class SubjectPredicates(PredicateCollection):
@@ -35,7 +34,7 @@ class SubjectPredicates(PredicateCollection):
 
         try:
             informed_consent_obj = informed_consent_cls.objects.filter(
-                subject_identifier=visit.appointment.subject_identifier).latest('created')
+                subject_identifier=visit.subject_identifier).latest('created')
         except informed_consent_cls.DoesNotExist:
             return False
         else:
@@ -140,23 +139,14 @@ class SubjectPredicates(PredicateCollection):
         else:
             return False
 
-    def fun_enrol_forms_required(self, visit=None, **kwargs):
+    def fun_is_enroll_visit(self, visit=None, **kwargs):
+        """Returns True if visit is an enrolment visit.
+        """
         inperson_visits = ['1000', '1070', '1170']
-        vac_history_cls = django_apps.get_model(
-            'esr21_subject.vaccinationhistory')
-        try:
-            vac_history_obj = vac_history_cls.objects.get(
-                subject_identifier=visit.subject_identifier,
-                report_datetime__lte=visit.report_datetime)
-        except vac_history_cls.DoesNotExist:
-            current_appointment = visit.appointment
-            if current_appointment.previous_by_timepoint:
-                return False
-            return visit.visit_code in inperson_visits
-        else:
-            vaccinated_onstudy = (vac_history_obj.dose1_product_name == 'azd_1222' or
-                                  vac_history_obj.dose2_product_name == 'azd_1222')
-            return visit.visit_code in inperson_visits and not vaccinated_onstudy
+        current_appointment = visit.appointment
+        return (visit.visit_code in inperson_visits and
+                not current_appointment.previous_by_timepoint and
+                visit.visit_code_sequence == 0)
 
     def fun_conc_med_required(self, visit=None, **kwargs):
         med_history_cls = django_apps.get_model(f'{self.app_label}.medicalhistory')
